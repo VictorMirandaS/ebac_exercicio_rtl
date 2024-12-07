@@ -1,38 +1,56 @@
-import { FormEvent, useState } from 'react';
-import styles from './PostComments.module.css';
+import { useState } from "react";
 
-import Comment from '../../models/Comment';
+type PostCommentsProps = {
+    comments?: string[]; // Lista inicial de comentários (opcional)
+};
 
-const Post = () => {
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [tempComment, setTempComment] = useState('');
+const PostComments = ({ comments = [] }: PostCommentsProps) => {
+    const [commentList, setCommentList] = useState(comments);
+    const [newComment, setNewComment] = useState("");
 
-    function handleAddComment(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const newComment = new Comment(comments.length, tempComment);
-        setTempComment('');
-        setComments([...comments, newComment]);
-    }
+    const handleAddComment = () => {
+        if (newComment.trim() !== "") {
+            setCommentList([...commentList, newComment]);
+            setNewComment("");
+        }
+    };
 
     return (
         <div>
-            <ul className={styles['post-comments']}>
-                {comments.map(({ comment, id }) => (
-                    <li className={styles['post-comment']} key={id}>
-                        <p className={styles['post-comment-content']}>
+            <ul className="post-comments" data-testid="post-comments">
+                {commentList.length > 0 ? (
+                    commentList.map((comment, index) => (
+                        <li key={index} className="post-comment" data-testid="post-comment">
                             {comment}
-                        </p>
-                    </li>
-                ))}
+                        </li>
+                    ))
+                ) : (
+                    <li className="post-comment">Nenhum comentário ainda.</li>
+                )}
             </ul>
-            <form onSubmit={handleAddComment} className={styles['post-comments-form']}>
-                <textarea value={tempComment} onChange={e => setTempComment(e.target.value)} required className={styles['post-comments-form-textarea']} />
-                <button type="submit" className={styles['post-comments-form-button']}>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleAddComment();
+                }}
+                className="post-comments-form"
+            >
+                <textarea
+                    className="post-comments-form-textarea"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    required
+                    aria-label="Adicionar comentário"
+                />
+                <button
+                    className="post-comments-form-button"
+                    type="submit"
+                >
                     Comentar
                 </button>
             </form>
         </div>
     );
-}
+};
 
-export default Post;
+export default PostComments;
